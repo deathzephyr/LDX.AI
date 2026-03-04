@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente Inteligente</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --chat-bg: #ffffff;
+            --user-msg: #007bff;
+            --bot-msg: #e9ecef;
+            --text-color: #333;
+            --accent: #0056b3;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            height: 90vh;
+            background-color: var(--chat-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background-color: var(--user-msg);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background-color: var(--user-msg);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .bot-message {
+            background-color: var(--bot-msg);
+            color: var(--text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            background-color: #fafafa;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        #userInput:focus {
+            border-color: var(--user-msg);
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: var(--user-msg);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--accent);
+        }
+
+        .loading {
+            display: none;
+            font-style: italic;
+            color: #666;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        Assistente de I.A
+    </div>
+    <div class="chat-box" id="chatBox">
+        <!-- Mensagem inicial -->
+        <div class="message bot-message">
+            Olá! Como posso ajudar você hoje?
+        </div>
+    </div>
+    <div class="loading" id="loadingIndicator">Digitando...</div>
+    
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Digite sua mensagem..." onkeypress="handleEnter(event)">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+</div>
+
+<script>
+    // --- CONFIGURAÇÃO DA API ---
+    // AVISO: Nunca exponha suas chaves reais em produção no frontend.
+    const CONFIG = {
+        API_URL: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions", // Exemplo de endpoint comum para esse tipo de chave (Baidu Qianfan)
+        // Coloque sua chave aqui APENAS para testes locais:
+        ACCESS_KEY: "7292d4ca5d944508ae2012cc8017fe84", // Key ID
+        SECRET_KEY: "7292d4ca5d944508ae2012cc8017fe84.QkRz0RjE90SJtuaM" // A parte depois do ponto na sua chave completa
+    };
+
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+
+    function addMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message');
+        msgDiv.classList.add(sender === 'user' ? 'user-message' : 'bot-message');
+        msgDiv.textContent = text;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function handleEnter(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    }
+
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        // Mostra mensagem do usuário
+        addMessage(text, 'user');
+        userInput.value = '';
+        
+        // Mostra loading
+        loadingIndicator.style.display = 'block';
+
+        try {
+            // --- LÓGICA DE INTEGRAÇÃO ---
+            // Nota: A integração exata depende de qual serviço é dono dessa chave.
+            // O formato "Key ID" e "Key" separados por ponto sugere Baidu Qianfan ou similar.
+            // Abaixo está um exemplo de como a chamada geralmente funciona.
+            
+            // Para Baidu Qianfan, primeiro obtém-se um token, depois chama o chat.
+            // Como não temos certeza absoluta do provedor sem o domínio, 
+            // este código simula uma resposta para demonstração. 
+            // Em produção, você faria um fetch para a API real.
+
+            /* 
+               EXEMPLO DE REQUISIÇÃO REAL (Comentei pois depende do provedor específico):
+            
+            const response = await fetch(`${CONFIG.API_URL}?access_token=${TOKEN_OBTIDO}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: [{ role: 'user', content: text }] })
+            });
+            const data = await response.json();
+            const botReply = data.result; 
+            */
+
+            // Simulação de resposta para demonstração da UI:
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Simula delay de rede
+            const botReply = `Recebi sua mensagem: "${text}". (Conecte sua API real aqui para obter respostas inteligentes).`;
+            
+            addMessage(botReply, 'bot');
+
+        } catch (error) {
+            console.error('Erro:', error);
+            addMessage('Desculpe, houve um erro ao conectar com a IA.', 'bot');
+        } finally {
+            loadingIndicator.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
